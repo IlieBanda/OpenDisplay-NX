@@ -8,7 +8,7 @@
 
 The first public release of OpenDisplay NX: a free, open-source Switch homebrew receiver for the [OpenDisplay Mac sender](https://github.com/peetzweg/opendisplay).
 
-Works directly with the [official OpenDisplay Sender for Mac](https://github.com/peetzweg/opendisplay/releases/latest) through the native OpenDisplay protocol. No modified sender or additional bridge is needed: the Switch appears in the app as **Switch OLED**.
+Works directly with the [official OpenDisplay Sender for Mac](https://github.com/peetzweg/opendisplay/releases/latest) through the native OpenDisplay protocol. No modified sender or additional bridge is needed: v0.1.0 appears in the app as **Switch OLED**. This is the receiver’s current discovery name, not a model restriction.
 
 ## What's included
 
@@ -32,6 +32,16 @@ You can also install the standalone **opendisplay-nx.nro** in `sd:/switch/opendi
 Press **+** for the menu, navigate with either stick or the D-pad, confirm with **A** and return with **B**. Disconnect and Exit are menu actions.
 
 ## Before you download
+
+The receiver targets the original Nintendo Switch family: **Switch V1/V2, Switch Lite and Switch OLED**. It does not require an OLED panel or detachable Joy-Con. All three model families use a 1280 × 720 handheld display ([Nintendo comparison](https://www.nintendo.com/en-gb/Hardware/Nintendo-Switch-Family/Which-Nintendo-Switch-is-right-for-you-/Which-Nintendo-Switch-is-right-for-you-1596110.html)).
+
+| Model | Validation status |
+|---|---|
+| Switch OLED | Tested on hardware |
+| Switch V1/V2 | Expected to work; not yet tested on hardware |
+| Switch Lite | Expected to work; not yet tested on hardware |
+
+A console capable of running homebrew with full application memory is required. Performance on V1/V2 and Lite still needs device testing.
 
 Hardware decoding supports up to 60 FPS; software decoding supports up to 30 FPS. Actual performance depends on your Mac and network. Switch OLED testing included smooth extended video playback, HOME return and a check that the screen stayed bright without controller input. See [performance notes](https://github.com/IlieBanda/OpenDisplay-NX/blob/main/docs/PERFORMANCE.md) for measured results and limitations.
 

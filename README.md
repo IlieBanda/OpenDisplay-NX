@@ -14,9 +14,9 @@
   <a href="https://github.com/IlieBanda/OpenDisplay-NX/issues">Report an issue</a>
 </p>
 
-OpenDisplay NX is a free, open-source homebrew receiver for Nintendo Switch and Switch OLED. Connect over Wi-Fi and use the console as an extra screen for your Mac with the [OpenDisplay sender](https://github.com/peetzweg/opendisplay).
+OpenDisplay NX is a free, open-source homebrew receiver for Nintendo Switch (V1/V2), Switch Lite and Switch OLED. Connect over Wi-Fi and use the console as an extra screen for your Mac with the [OpenDisplay sender](https://github.com/peetzweg/opendisplay).
 
-Works directly with the [official OpenDisplay Sender for Mac](https://github.com/peetzweg/opendisplay/releases/latest) through the native OpenDisplay protocol. No modified sender or additional bridge is needed: the Switch appears in the app as **Switch OLED**.
+Works directly with the [official OpenDisplay Sender for Mac](https://github.com/peetzweg/opendisplay/releases/latest) through the native OpenDisplay protocol. No modified sender or additional bridge is needed: v0.1.0 appears in the app as **Switch OLED**. This is the receiver’s current discovery name, not a model restriction.
 
 ## Features
 
@@ -49,6 +49,16 @@ Press **+** to open the menu during playback. Decoder mode, statistics, language
 | Touch | Control the Mac pointer or select menu items |
 
 ## Compatibility
+
+The receiver targets the original Nintendo Switch family: **Switch V1/V2, Switch Lite and Switch OLED**. It does not require an OLED panel or detachable Joy-Con. All three model families use a 1280 × 720 handheld display ([Nintendo comparison](https://www.nintendo.com/en-gb/Hardware/Nintendo-Switch-Family/Which-Nintendo-Switch-is-right-for-you-/Which-Nintendo-Switch-is-right-for-you-1596110.html)).
+
+| Model | Validation status |
+|---|---|
+| Switch OLED | Tested on hardware |
+| Switch V1/V2 | Expected to work; not yet tested on hardware |
+| Switch Lite | Expected to work; not yet tested on hardware |
+
+A console capable of running homebrew with full application memory is required. Performance on V1/V2 and Lite still needs device testing.
 
 The receiver uses Wi-Fi IPv4 and the OpenDisplay v3 protocol. It advertises a 1280 × 720 display and supports up to 60 FPS with hardware decoding, or up to 30 FPS with software decoding. Actual frame rate and delay depend on the sender and network.
 
