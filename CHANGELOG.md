@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1 — 2026-10-10
+
+- Use the model-neutral Nintendo Switch name in Bonjour discovery, protocol identity, interface and all four language instructions.
+- Clarify compatibility with V1/V2, Lite and OLED; hardware validation remains limited to OLED.
+
 ## 0.1.0 — 2026-10-10
 
 First public release.

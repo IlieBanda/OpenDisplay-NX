@@ -1,4 +1,5 @@
 #pragma once
+#include "device_identity.hpp"
 #include "localization.hpp"
 #include "ui_font.hpp"
 #include <cmath>
@@ -28,7 +29,7 @@ inline void draw(SDL_Renderer *renderer, const std::string &state,
   color(fg);
   text("OpenDisplay NX", 65, 26, 28);
   color(dark ? 170 : 110);
-  text("Nintendo Switch OLED", 980, 31, 18);
+  text(device::name, 980, 31, 18);
   color(fg);
   SDL_RenderDrawLine(renderer, 30, 88, 1250, 88);
   color(dark ? 50 : 240);
@@ -41,7 +42,7 @@ inline void draw(SDL_Renderer *renderer, const std::string &state,
                    tr(connected ? locale::Connected : locale::Connect), 70, 150,
                    24, 300);
   color(dark ? 175 : 110);
-  text("Switch OLED", 70, 216, 20);
+  text(device::name, 70, 216, 20);
   if (!connected) {
     color(fg);
     const std::string instructions =

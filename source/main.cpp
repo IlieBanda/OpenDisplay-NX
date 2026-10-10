@@ -1,5 +1,6 @@
 #include "cursor.hpp"
 #include "dashboard.hpp"
+#include "device_identity.hpp"
 #include "discovery.hpp"
 #include "json.hpp"
 #include "latest_frame.hpp"
@@ -663,7 +664,7 @@ int main() {
   rename("sdmc:/switch/opendisplay-nx/session.log",
          "sdmc:/switch/opendisplay-nx/session-previous.log");
   sessionLog = fopen("sdmc:/switch/opendisplay-nx/session.log", "w");
-  logMessage("OpenDisplay NX 0.1.0");
+  logMessage("OpenDisplay NX 0.1.1");
   av_log_set_level(AV_LOG_WARNING);
   av_log_set_callback([](void *, int level, const char *format, va_list args) {
     std::lock_guard<std::mutex> lock(logMutex);
@@ -774,7 +775,7 @@ int main() {
          {"pixelsHigh", 720},
          {"scale", 1},
          {"panel", {{"pixelsWide", 1280}, {"pixelsHigh", 720}, {"scale", 1}}},
-         {"device", "Nintendo Switch OLED"},
+         {"device", device::name},
          {"id", id},
          {"pv", 3},
          {"displayMaxFrameRate", 60},

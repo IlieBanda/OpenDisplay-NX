@@ -1,4 +1,5 @@
 #pragma once
+#include "device_identity.hpp"
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -37,7 +38,7 @@ inline void record(std::vector<uint8_t> &b, const std::string &n, int type,
 inline std::vector<uint8_t> announcement(const std::string &id, uint32_t ip,
                                          unsigned ttl = 120) {
   std::string service = "_opensidecar._tcp.local",
-              instance = "Switch OLED." + service,
+              instance = std::string(device::name) + "." + service,
               host = "opendisplay-" + id.substr(0, 8) + ".local";
   std::vector<uint8_t> b, d;
   u16(b, 0);
