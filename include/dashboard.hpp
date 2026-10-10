@@ -28,9 +28,6 @@ inline void draw(SDL_Renderer *renderer, const std::string &state,
   SDL_RenderClear(renderer);
   color(fg);
   text("OpenDisplay NX", 65, 26, 28);
-  color(dark ? 170 : 110);
-  text(device::name, 980, 31, 18);
-  color(fg);
   SDL_RenderDrawLine(renderer, 30, 88, 1250, 88);
   color(dark ? 50 : 240);
   SDL_Rect side{30, 89, 380, 558};
