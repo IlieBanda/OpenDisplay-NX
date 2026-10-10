@@ -8,7 +8,7 @@
 
 The first public release of OpenDisplay NX: a free, open-source Switch homebrew receiver for the [OpenDisplay Mac sender](https://github.com/peetzweg/opendisplay).
 
-Works directly with the [official OpenDisplay Sender for Mac](https://github.com/peetzweg/opendisplay/releases/latest) through the native OpenDisplay protocol. No modified sender or additional bridge is needed: v0.1.0 appears in the app as **Switch OLED**. This is the receiver’s current discovery name, not a model restriction.
+Works directly with the [official OpenDisplay Sender for Mac](https://github.com/peetzweg/opendisplay/releases/latest) through the native OpenDisplay protocol. No modified sender or additional bridge is needed. Select your Switch from the sender’s device list to connect.
 
 ## What's included
 
@@ -25,7 +25,7 @@ Works directly with the [official OpenDisplay Sender for Mac](https://github.com
 1. Download **OpenDisplay-NX-v0.1.0.zip** below and extract it to the root of your SD card.
 2. Hold **R** while launching a game to open Homebrew Menu with full application memory, then launch **OpenDisplay NX**.
 3. Connect the Switch and Mac to the same Wi-Fi network. **5 GHz** is recommended.
-4. In the OpenDisplay Mac sender, select **Switch OLED** and start with **Fast** quality.
+4. In the OpenDisplay Mac sender, select your Switch from the device list and start with **Fast** quality.
 
 You can also install the standalone **opendisplay-nx.nro** in `sd:/switch/opendisplay-nx/`.
 
