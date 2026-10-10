@@ -12,6 +12,9 @@
 #include <pthread.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#ifdef __SWITCH__
+#include <switch.h>
+#endif
 
 // Separate bounded channel; failure never tears down the video connection.
 class InputCompanion {
@@ -129,6 +132,7 @@ class InputCompanion {
   }
   void loop() {
     while (running) {
+      bool activePeer = false;
       {
         std::lock_guard<std::mutex> lock(mutex);
         const double now = clock();
@@ -170,8 +174,13 @@ class InputCompanion {
               return send(peer, p, n, 0);
             }))
           closePeer();
+        activePeer = peer >= 0;
       }
-      poll(nullptr, 0, 8);
+#ifdef __SWITCH__
+      svcSleepThread(activePeer ? 8000000 : 50000000);
+#else
+      usleep(activePeer ? 8000 : 50000);
+#endif
     }
   }
 
