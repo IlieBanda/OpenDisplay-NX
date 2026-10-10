@@ -16,6 +16,8 @@
 
 OpenDisplay NX is a free, open-source homebrew receiver for Nintendo Switch and Switch OLED. Connect over Wi-Fi and use the console as an extra screen for your Mac with the [OpenDisplay sender](https://github.com/peetzweg/opendisplay).
 
+Works directly with the [official OpenDisplay Sender for Mac](https://github.com/peetzweg/opendisplay/releases/latest) through the native OpenDisplay protocol. No modified sender or additional bridge is needed: the Switch appears in the app as **Switch OLED**.
+
 ## Features
 
 - **720p video.** H.264 hardware decoding through Tegra NVDEC, with software fallback.

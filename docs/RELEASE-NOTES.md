@@ -8,6 +8,8 @@
 
 The first public release of OpenDisplay NX: a free, open-source Switch homebrew receiver for the [OpenDisplay Mac sender](https://github.com/peetzweg/opendisplay).
 
+Works directly with the [official OpenDisplay Sender for Mac](https://github.com/peetzweg/opendisplay/releases/latest) through the native OpenDisplay protocol. No modified sender or additional bridge is needed: the Switch appears in the app as **Switch OLED**.
+
 ## What's included
 
 - 720p H.264 video with Tegra NVDEC hardware decoding and software fallback.
