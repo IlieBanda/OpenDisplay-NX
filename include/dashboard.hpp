@@ -17,9 +17,7 @@ inline void draw(SDL_Renderer *renderer, const std::string &state,
                  const std::string &address, bool softwarePreference,
                  bool dark = true, int focus = 0, bool stats = false,
                  bool connected = false,
-                 locale::Language language = locale::Language::English,
-                 const std::string &pairCode = "",
-                 bool inputConnected = false) {
+                 locale::Language language = locale::Language::English) {
   auto tr = [&](locale::Key key) { return locale::text(key, language); };
   const Uint8 bg = dark ? 45 : 235, fg = dark ? 255 : 45;
   auto color = [&](Uint8 v) { SDL_SetRenderDrawColor(renderer, v, v, v, 255); };
@@ -47,17 +45,6 @@ inline void draw(SDL_Renderer *renderer, const std::string &state,
     const std::string instructions =
         std::string(tr(locale::Instruction1)) + " " + tr(locale::Instruction2);
     ui::wrappedLabel(renderer, instructions.c_str(), 70, 270, 18, 300);
-  }
-  if (connected && !pairCode.empty()) {
-    color(dark ? 175 : 110);
-    ui::wrappedLabel(
-        renderer,
-        tr(inputConnected ? locale::InputConnected : locale::InputPairCode), 70,
-        277, 18, 300);
-    if (!inputConnected) {
-      color(fg);
-      text(pairCode.c_str(), 70, 314, 28);
-    }
   }
   color(dark ? 175 : 110);
   text(tr(locale::Address), 70, 405, 18);

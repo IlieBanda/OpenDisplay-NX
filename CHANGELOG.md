@@ -1,18 +1,5 @@
 # Changelog
 
-## 0.2.0 — development build
-
-- Add left-stick pointer motion with a radial deadzone and frame-rate-independent speed.
-- Map ZR to left mouse press/release/drag and the right stick to two-axis scrolling.
-- Add the optional OpenDisplay NX Input companion for Mac, retaining the official Sender.
-- Pair the companion with a per-session code; accept it only from the video sender's IPv4 address.
-- Add ZL right mouse press/release/drag and the native Switch keyboard on X with Unicode text input.
-- Release controller buttons on HOME, menus, keyboard opening and connection loss.
-- Keep video decoding and both network channels active while the system keyboard is open.
-- Show the pairing code/status in the Switch menu in all four languages.
-
-Hardware validation of the new controller/keyboard features is pending. The companion currently builds locally for the host Mac architecture and is not notarized.
-
 ## 0.1.2 — 2026-10-10
 
 - Detect the console product model through libnx and show Switch OLED, Switch Lite or Nintendo Switch consistently in discovery, protocol identity and the interface.

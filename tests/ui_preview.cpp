@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
   for (int language = 0; language < 4; ++language) {
     dashboard::draw(renderer, "Connected. Waiting for H.264 video...",
                     "192.168.1.100", false, true, 2, true, true,
-                    static_cast<locale::Language>(language), "123456", false);
+                    static_cast<locale::Language>(language));
     png_image image{};
     image.version = PNG_IMAGE_VERSION;
     image.width = 1280;

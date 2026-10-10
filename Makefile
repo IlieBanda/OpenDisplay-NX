@@ -1,7 +1,7 @@
 ICON := assets/icon.jpg
 APP_TITLE := OpenDisplay NX
 APP_AUTHOR := OpenDisplay NX contributors
-APP_VERSION := 0.2.0
+APP_VERSION := 0.1.2
 #---------------------------------------------------------------------------------
 .SUFFIXES:
 #---------------------------------------------------------------------------------
