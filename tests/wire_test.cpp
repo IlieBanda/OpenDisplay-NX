@@ -2,6 +2,7 @@
 #include "json.hpp"
 #include "wire.hpp"
 #include <arpa/inet.h>
+#include <algorithm>
 #include <cassert>
 #include <iostream>
 using Bytes = std::vector<uint8_t>;
@@ -46,9 +47,20 @@ int main() {
     assert(f.feed(b.data(), b.size(), [&](const Bytes &) { ++count; }));
     assert(count == 1);
   }
+  for (const auto &entry : {
+      std::pair{device::Model::Unknown, "Nintendo Switch"},
+      std::pair{device::Model::Standard, "Nintendo Switch"},
+      std::pair{device::Model::Lite, "Switch Lite"},
+      std::pair{device::Model::Oled, "Switch OLED"}}) {
+    device::name = device::nameForModel(entry.first);
+    assert(std::string(device::name) == entry.second);
   auto packet = discovery::announcement("01234567-89ab-4cde-8012-3456789abcde",
                                         inet_addr("192.168.1.10"));
   assert(packet[2] == 0x84 && packet[7] == 5);
+  Bytes expectedInstance;
+  discovery::name(expectedInstance, std::string(entry.second) + "._opensidecar._tcp.local");
+  assert(std::search(packet.begin(), packet.end(), expectedInstance.begin(),
+                     expectedInstance.end()) != packet.end());
   size_t pos = 12;
   int records = 0;
   while (pos < packet.size()) {
@@ -73,6 +85,8 @@ int main() {
     ++records;
   }
   assert(records == 5);
+  }
+  device::name = device::nameForModel(device::Model::Unknown);
   std::cout << "OK: fragmentation, coalescing, length bounds, telemetry demux, "
                "DNS-SD records\n";
 }

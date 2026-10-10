@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.2 — 2026-10-10
+
+- Detect the console product model through libnx and show Switch OLED, Switch Lite or Nintendo Switch consistently in discovery, protocol identity and the interface.
+- Fall back to Nintendo Switch when the model is unknown or unavailable.
+
 ## 0.1.1 — 2026-10-10
 
 - Use the model-neutral Nintendo Switch name in Bonjour discovery, protocol identity, interface and all four language instructions.

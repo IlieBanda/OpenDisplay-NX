@@ -664,7 +664,33 @@ int main() {
   rename("sdmc:/switch/opendisplay-nx/session.log",
          "sdmc:/switch/opendisplay-nx/session-previous.log");
   sessionLog = fopen("sdmc:/switch/opendisplay-nx/session.log", "w");
-  logMessage("OpenDisplay NX 0.1.1");
+  logMessage("OpenDisplay NX 0.1.2");
+  Result modelService = setsysInitialize();
+  if (R_SUCCEEDED(modelService)) {
+    SetSysProductModel productModel = SetSysProductModel_Invalid;
+    Result modelResult = setsysGetProductModel(&productModel);
+    if (R_SUCCEEDED(modelResult)) {
+      switch (productModel) {
+      case SetSysProductModel_Nx:
+      case SetSysProductModel_Iowa:
+        device::name = device::nameForModel(device::Model::Standard);
+        break;
+      case SetSysProductModel_Hoag:
+        device::name = device::nameForModel(device::Model::Lite);
+        break;
+      case SetSysProductModel_Aula:
+        device::name = device::nameForModel(device::Model::Oled);
+        break;
+      default: break;
+      }
+      logMessage("Console product model: %u (%s)", unsigned(productModel), device::name);
+    } else {
+      logMessage("Product model query failed: %08x; using %s", modelResult, device::name);
+    }
+    setsysExit();
+  } else {
+    logMessage("Product model service unavailable: %08x; using %s", modelService, device::name);
+  }
   av_log_set_level(AV_LOG_WARNING);
   av_log_set_callback([](void *, int level, const char *format, va_list args) {
     std::lock_guard<std::mutex> lock(logMutex);
