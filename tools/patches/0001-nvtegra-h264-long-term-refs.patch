@@ -1,0 +1,13 @@
+diff --git a/libavcodec/nvtegra_h264.c b/libavcodec/nvtegra_h264.c
+index e425ec5..d8a956f 100644
+--- a/libavcodec/nvtegra_h264.c
++++ b/libavcodec/nvtegra_h264.c
+@@ -281,7 +281,7 @@ static void nvtegra_h264_prepare_frame_setup(nvdec_h264_pic_s *setup, H264Contex
+     max = FFMIN(16, FF_ARRAY_ELEMS(refs) - num_refs);
+     for (i = 0; i < max; ++i)
+         if (h->long_ref[i])
+-            refs[num_refs++] = h->short_ref[i];
++            refs[num_refs++] = h->long_ref[i];
+ 
+     /* Add all frames with an already allocated DPB index to our ref list */
+     for (i = 0; i < num_refs; ++i) {

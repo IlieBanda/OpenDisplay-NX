@@ -1,0 +1,15 @@
+upstream/
+deps/
+build/
+build-ffmpeg/
+*.elf
+*.nacp
+*.nro
+*.map
+.DS_Store
+dist/
+__pycache__/
+build-nvtegra/
+
+*.log
+*.zip
