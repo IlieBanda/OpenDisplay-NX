@@ -38,3 +38,9 @@ fi
 ./build/performance-test
 "$cxx" -std=c++17 -Wall -Wextra -fsanitize=address,undefined -Iinclude tests/h264_stream_test.cpp -o build/h264-stream-test
 ./build/h264-stream-test
+
+"$cxx" -std=c++17 -Wall -Wextra -fsanitize=address,undefined -Iinclude tests/controller_test.cpp -o build/controller-test
+./build/controller-test
+
+"$cxx" -std=c++17 -Wall -Wextra -fsanitize=address,undefined -Iinclude tests/input_companion_test.cpp -o build/input-companion-test
+./build/input-companion-test

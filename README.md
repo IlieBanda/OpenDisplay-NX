@@ -36,7 +36,7 @@ Works directly with the [official OpenDisplay Sender for Mac](https://github.com
 
 For a manual installation, place `opendisplay-nx.nro` in `sd:/switch/opendisplay-nx/`. Homebrew Menu launched from the Album does not provide the required application memory.
 
-## Controls
+## Controls (v0.1.0)
 
 Press **+** to open the menu during playback. Decoder mode, statistics, language, Disconnect and Exit are available there.
 
@@ -47,6 +47,12 @@ Press **+** to open the menu during playback. Decoder mode, statistics, language
 | A | Confirm |
 | B | Return to video |
 | Touch | Control the Mac pointer or select menu items |
+
+## Controller input (development)
+
+The v0.2.0 development build adds left-stick pointer motion, **ZR** left click/drag and right-stick scrolling with the official Sender. An optional **OpenDisplay NX Input** Mac companion adds **ZL** right click/drag and the native Switch keyboard on **X**. The companion pairs using a code shown in the **+** menu; the official Sender remains unchanged.
+
+See [controller setup](docs/CONTROLLERS.md) for instructions and build requirements. These features are not part of the published v0.1.0 download and still need hardware validation.
 
 ## Compatibility
 

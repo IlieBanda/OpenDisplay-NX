@@ -13,3 +13,6 @@ build-nvtegra/
 
 *.log
 *.zip
+
+companion/.build/
+companion/.swiftpm/

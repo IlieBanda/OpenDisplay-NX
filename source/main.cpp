@@ -1,7 +1,9 @@
+#include "controller_input.hpp"
 #include "cursor.hpp"
 #include "dashboard.hpp"
 #include "device_identity.hpp"
 #include "discovery.hpp"
+#include "input_companion.hpp"
 #include "json.hpp"
 #include "latest_frame.hpp"
 #include "outbox.hpp"
@@ -147,6 +149,8 @@ public:
   bool darkTheme = true, menuOpen = false, connected = false;
 
   locale::Language language = locale::Language::English;
+  std::string inputPairCode;
+  bool inputConnected = false;
   int focus = 0;
   bool fontService = false;
   int maxFrameRate() const { return hardwareAvailable ? 60 : 30; }
@@ -467,7 +471,8 @@ public:
   }
   void dashboard() {
     ::dashboard::draw(renderer, state, address, softwarePreference, darkTheme,
-                      focus, showOverlay, connected, language);
+                      focus, showOverlay, connected, language, inputPairCode,
+                      inputConnected);
   }
   void present(bool cursor, double x, double y) {
     if (!ensureGraphics()) {
@@ -664,7 +669,7 @@ int main() {
   rename("sdmc:/switch/opendisplay-nx/session.log",
          "sdmc:/switch/opendisplay-nx/session-previous.log");
   sessionLog = fopen("sdmc:/switch/opendisplay-nx/session.log", "w");
-  logMessage("OpenDisplay NX 0.1.2");
+  logMessage("OpenDisplay NX 0.2.0");
   Result modelService = setsysInitialize();
   if (R_SUCCEEDED(modelService)) {
     SetSysProductModel productModel = SetSysProductModel_Invalid;
@@ -681,15 +686,19 @@ int main() {
       case SetSysProductModel_Aula:
         device::name = device::nameForModel(device::Model::Oled);
         break;
-      default: break;
+      default:
+        break;
       }
-      logMessage("Console product model: %u (%s)", unsigned(productModel), device::name);
+      logMessage("Console product model: %u (%s)", unsigned(productModel),
+                 device::name);
     } else {
-      logMessage("Product model query failed: %08x; using %s", modelResult, device::name);
+      logMessage("Product model query failed: %08x; using %s", modelResult,
+                 device::name);
     }
     setsysExit();
   } else {
-    logMessage("Product model service unavailable: %08x; using %s", modelService, device::name);
+    logMessage("Product model service unavailable: %08x; using %s",
+               modelService, device::name);
   }
   av_log_set_level(AV_LOG_WARNING);
   av_log_set_callback([](void *, int level, const char *format, va_list args) {
@@ -780,14 +789,27 @@ int main() {
   } else
     nonblock(cursorSocket);
   StreamSession stream(video, output, cursorSocket);
+  InputCompanion companion;
+  const bool companionAvailable = companion.start();
+  logMessage("Input companion listener: %s",
+             companionAvailable ? "ready" : "unavailable");
+  bool companionMode = false;
   double lastAd = 0, networkCheck = 0, discoveryCheck = -250;
   double lastActivityReport = -30000;
-  bool touching = false, cursor = false;
+  controller::Pointer controllerPointer;
+  double lastControllerTime = now();
+  bool touching = false, cursor = false, touchArmed = true;
   double tx = 0, ty = 0, cx = 0, cy = 0;
   bool drop = false;
   auto queue = [&](const json &j) {
     if (peer >= 0 && !stream.queue(j))
       drop = true;
+  };
+  auto queueController = [&](const json &j) {
+    if (companionMode)
+      companion.queue(j);
+    else
+      queue(j);
   };
   bool softwareOnly = false;
   int offeredRate = 30;
@@ -818,20 +840,30 @@ int main() {
   };
   auto disconnect = [&]() {
     stream.stop();
+    companion.end();
+    video.inputPairCode.clear();
+    video.inputConnected = false;
+    companionMode = false;
     if (peer >= 0)
       close(peer);
     peer = -1;
     output.clear();
     video.clearStream();
     touching = false;
+    touchArmed = true;
+    controllerPointer.reset();
     cursor = false;
     drop = false;
     status("Waiting for sender...");
   };
   auto closeCleanly = [&]() {
+    if (peer >= 0)
+      for (auto &event : controllerPointer.cancel())
+        queueController(event);
     stream.stop();
     if (peer >= 0 && touching)
-      queue({{"type", "touch"}, {"phase", "cancelled"}, {"x", tx}, {"y", ty}});
+      queueController(
+          {{"type", "touch"}, {"phase", "cancelled"}, {"x", tx}, {"y", ty}});
     if (peer >= 0)
       logMessage("Closing notification %s",
                  finishSession(peer, output) ? "sent" : "failed");
@@ -858,7 +890,7 @@ int main() {
       },
       &leaveSession);
   while (appletMainLoop()) {
-    const bool foreground = appletGetFocusState() == AppletFocusState_InFocus;
+    bool foreground = appletGetFocusState() == AppletFocusState_InFocus;
     padUpdate(&pad);
     u64 down = foreground ? padGetButtonsDown(&pad) : 0;
     HidTouchScreenState touch{};
@@ -916,6 +948,8 @@ int main() {
       }
     }
     double t = now();
+    const double controllerSeconds = (t - lastControllerTime) / 1000.0;
+    lastControllerTime = t;
     if (withdrawn && appletGetFocusState() == AppletFocusState_InFocus) {
       announce(120);
       withdrawn = false;
@@ -987,6 +1021,20 @@ int main() {
     if (incoming >= 0) {
       disconnect();
       peer = incoming;
+      if (companionAvailable) {
+        sockaddr_in sender{};
+        socklen_t senderSize = sizeof(sender);
+        if (getpeername(peer, reinterpret_cast<sockaddr *>(&sender),
+                        &senderSize) == 0) {
+          char code[7];
+          snprintf(code, sizeof(code), "%06u",
+                   unsigned(randomGet64() % 1000000));
+          video.inputPairCode = code;
+          companion.begin(
+              sender.sin_addr, code,
+              {{"type", "ready"}, {"device", device::name}, {"id", id}});
+        }
+      }
       lastActivityReport = t - 30000;
       nonblock(peer);
       setsockopt(peer, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
@@ -1033,8 +1081,79 @@ int main() {
           status("Video stream connected");
         }
       }
-      bool active =
-          foreground && !video.menuOpen && touch.count > 0 && video.ready;
+      video.inputConnected = companion.connected();
+      if (video.inputConnected != companionMode) {
+        for (auto &event : controllerPointer.cancel())
+          queueController(event);
+        if (touching) {
+          queueController({{"type", "touch"},
+                           {"phase", "cancelled"},
+                           {"x", tx},
+                           {"y", ty}});
+          touching = false;
+          touchArmed = false;
+        }
+        companionMode = video.inputConnected;
+      }
+      bool keyboardUsed = false;
+      if (foreground && video.ready && !video.menuOpen &&
+          (down & HidNpadButton_X)) {
+        for (auto &event : controllerPointer.cancel())
+          queueController(event);
+        if (touching) {
+          queueController({{"type", "touch"},
+                           {"phase", "cancelled"},
+                           {"x", tx},
+                           {"y", ty}});
+          touching = false;
+        }
+        if (companionMode) {
+          keyboardUsed = true;
+          companion.queue({{"type", "release"}});
+          SwkbdConfig keyboard{};
+          Result result = swkbdCreate(&keyboard, 0);
+          if (R_SUCCEEDED(result)) {
+            swkbdConfigMakePresetDefault(&keyboard);
+            swkbdConfigSetType(&keyboard, SwkbdType_All);
+            swkbdConfigSetStringLenMax(&keyboard, 1024);
+            swkbdConfigSetHeaderText(
+                &keyboard, locale::text(locale::KeyboardTitle, video.language));
+            swkbdConfigSetGuideText(
+                &keyboard, locale::text(locale::KeyboardGuide, video.language));
+            char text[4097]{};
+            result = swkbdShow(&keyboard, text, sizeof(text));
+            if (R_SUCCEEDED(result) && text[0] && companion.connected())
+              companion.queue({{"type", "text"}, {"text", text}});
+            swkbdClose(&keyboard);
+          }
+          lastControllerTime = now();
+          foreground = appletGetFocusState() == AppletFocusState_InFocus;
+          touch = {};
+          padUpdate(&pad);
+          logMessage("Keyboard completed: %08x", result);
+        } else {
+          video.menuOpen = true;
+          video.focus = 0;
+        }
+      }
+      if (touch.count == 0)
+        touchArmed = true;
+      if (video.menuOpen)
+        touchArmed = false;
+      bool active = foreground && !video.menuOpen && touch.count > 0 &&
+                    video.ready && touchArmed;
+      const auto leftStick = padGetStickPos(&pad, 0);
+      const auto rightStick = padGetStickPos(&pad, 1);
+      const u64 held = foreground ? padGetButtons(&pad) : 0;
+      for (auto &event : controllerPointer.update(
+               foreground && video.ready && !video.menuOpen && !active &&
+                   !touching && !keyboardUsed,
+               {leftStick.x / 32767.0, leftStick.y / 32767.0},
+               {rightStick.x / 32767.0, rightStick.y / 32767.0},
+               (held & HidNpadButton_ZR) != 0, controllerSeconds, cx, cy,
+               video.rect.w, video.rect.h,
+               companionMode && (held & HidNpadButton_ZL) != 0))
+        queueController(event);
       double x = tx, y = ty;
       if (active) {
         x = std::clamp((double(touch.touches[0].x) - video.rect.x) /
@@ -1046,10 +1165,13 @@ int main() {
       }
       if (active || touching) {
         if (active != touching || x != tx || y != ty)
-          queue({{"type", "touch"},
-                 {"phase", active ? (touching ? "moved" : "began") : "ended"},
-                 {"x", x},
-                 {"y", y}});
+          queueController(
+              {{"type", "touch"},
+               {"phase", active ? (touching ? "moved" : "began")
+                                : (!foreground || video.menuOpen ? "cancelled"
+                                                                 : "ended")},
+               {"x", x},
+               {"y", y}});
         tx = x;
         ty = y;
         touching = active;
@@ -1097,6 +1219,7 @@ finished:
   appletUnhook(&hookCookie);
   closeCleanly();
   announce(0);
+  companion.stop();
   close(listener);
   close(mdns);
   if (cursorSocket >= 0)

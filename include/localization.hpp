@@ -36,6 +36,10 @@ enum Key {
   VideoConnected,
   MenuKey,
   SettingsTitle,
+  InputPairCode,
+  InputConnected,
+  KeyboardTitle,
+  KeyboardGuide,
   Count
 };
 inline constexpr const char *strings[Count][4] = {
@@ -93,7 +97,15 @@ inline constexpr const char *strings[Count][4] = {
     {"Video stream connected", "Видеопоток подключён", "Vídeo conectado",
      "视频流已连接"},
     {"Menu", "Меню", "Menú", "菜单"},
-    {"Settings", "Настройки", "Ajustes", "设置"}};
+    {"Settings", "Настройки", "Ajustes", "设置"},
+    {"Input pairing code", "Код сопряжения ввода", "Código de vinculación",
+     "输入配对码"},
+    {"Controller input connected", "Управление подключено", "Control conectado",
+     "控制器已连接"},
+    {"Text for your Mac", "Текст для Mac", "Texto para tu Mac",
+     "发送文本到 Mac"},
+    {"Text goes to the focused Mac app.", "Текст вводится в активное окно Mac.",
+     "Texto para la app activa del Mac.", "文本将输入到 Mac 当前窗口。"}};
 constexpr bool completeCatalog() {
   for (const auto &entry : strings)
     for (const auto *translation : entry)

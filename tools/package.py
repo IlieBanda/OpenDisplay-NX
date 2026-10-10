@@ -45,9 +45,9 @@ def main():
             raise ValueError('FFmpeg source revision does not match build pin')
         source_archive = dist / f'OpenDisplay-NX-v{version}-sources.zip'
         with zipfile.ZipFile(source_archive, 'w', zipfile.ZIP_DEFLATED) as z:
-            for dirname in ('source', 'include', 'tests', 'tools', 'LICENSES', 'docs', 'assets'):
+            for dirname in ('source', 'include', 'tests', 'tools', 'LICENSES', 'docs', 'assets', 'companion', 'script', '.codex'):
                 for p in sorted((ROOT / dirname).rglob('*')):
-                    if p.is_file() and '__pycache__' not in p.parts:
+                    if p.is_file() and not any(part in p.parts for part in ('__pycache__', '.build', '.swiftpm')):
                         z.write(p, p.relative_to(ROOT))
             for filename in ('Makefile', 'README.md', 'CHANGELOG.md', 'LICENSE', '.gitignore'):
                 z.write(ROOT / filename, filename)
