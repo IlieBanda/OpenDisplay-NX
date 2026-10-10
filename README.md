@@ -1,89 +1,58 @@
-# OpenDisplay NX
+<p align="center">
+  <img src="assets/opendisplay-nx-neon-preview.png" alt="OpenDisplay NX icon" width="144">
+</p>
 
-Use a Nintendo Switch / Switch OLED as an extra display for your Mac.
-Independent OpenDisplay receiver for Switch homebrew, built with devkitPro/libnx.
+<h1 align="center">OpenDisplay NX</h1>
 
-**Current release: v0.1.0.** H.264 hardware decoding, Switch-style
-menu, touch input, and English/Russian/Spanish/Simplified Chinese UI.
+<p align="center">Turn your Nintendo Switch into a second display for your Mac.</p>
 
-A Switch OLED user confirmed roughly ten minutes of smooth YouTube playback
-with audio through Mac-connected AirPods, working HOME return and corrected
-full application shutdown. Physical 720p/60 tests normally sampled 57–60 FPS
-on the latest pipeline, but one Wi-Fi run had a severe latency spike.
-Stable 60 FPS in every network condition is not established.
-See [performance measurements](docs/PERFORMANCE.md) for test conditions.
+<p align="center">
+  <a href="https://github.com/IlieBanda/OpenDisplay-NX/releases/latest">Download</a> ·
+  <a href="#quick-start">Quick start</a> ·
+  <a href="#controls">Controls</a> ·
+  <a href="docs/PERFORMANCE.md">Performance</a> ·
+  <a href="https://github.com/IlieBanda/OpenDisplay-NX/issues">Report an issue</a>
+</p>
 
-Download the NRO or installation ZIP from [Releases](https://github.com/IlieBanda/OpenDisplay-NX/releases).
+OpenDisplay NX is a free, open-source homebrew receiver for Nintendo Switch and Switch OLED. Connect over Wi-Fi and use the console as an extra screen for your Mac with the [OpenDisplay sender](https://github.com/peetzweg/opendisplay).
 
-## Install
+## Features
 
-1. Extract the release archive into the root of your SD card. The executable goes to
-   `sd:/switch/opendisplay-nx/opendisplay-nx.nro`.
-2. Launch Homebrew Menu through a game using **R** title override, then OpenDisplay NX.
-   Full application memory is required.
-3. Put Switch and Mac on the same Wi-Fi network (5 GHz recommended).
-4. In the [OpenDisplay Mac sender](https://github.com/peetzweg/opendisplay), select
-   **Switch OLED**. Start with its **Fast** setting.
+- **720p video.** H.264 hardware decoding through Tegra NVDEC, with software fallback.
+- **Touch input.** Control the Mac pointer from the Switch screen, with the sender's cursor displayed on the receiver.
+- **A familiar interface.** Switch-style menus, console system fonts, native button symbols and light/dark themes.
+- **Four languages.** English, Russian, Spanish and Simplified Chinese, with your choice saved between launches.
+- **Uninterrupted viewing.** The screen stays awake while connected. HOME keeps the session running; fully closing the application disconnects the Mac.
+- **Optional statistics.** View FPS and estimated delay from the menu when you need them.
 
-The receiver announces a 1280×720 panel. It offers H.264 up to 60 FPS when the
-hardware device initializes and up to 30 FPS in software mode. These are
-negotiation ceilings. The optional overlay shows one FPS value: distinct video
-images submitted to the display per second. Redrawing the same image does not
-inflate FPS. A static desktop shows DESKTOP IDLE. DELAY estimates Mac capture to
-SDL presentation return, with the same minimum-RTT clock synchronization used by
-OpenDisplay. It is not a measured capture-to-photon number. Missing timestamps or
-clock synchronization show `--`.
-Statistics are hidden by default; open the menu with + and select Statistics. The settings language
-can be English, Russian, Spanish or Simplified Chinese. Select Language and
-press A to cycle; the choice is saved on the SD card. Both sticks and D-pad
-navigate settings.
+## Quick start
+
+1. Download [OpenDisplay NX v0.1.0](https://github.com/IlieBanda/OpenDisplay-NX/releases/latest) and extract the installation ZIP to the root of your SD card.
+2. Hold **R** while launching a game to open Homebrew Menu with full application memory, then launch **OpenDisplay NX**.
+3. Connect your Switch and Mac to the same Wi-Fi network. **5 GHz** is recommended.
+4. Open the [OpenDisplay Mac sender](https://github.com/peetzweg/opendisplay/releases/latest), select **Switch OLED** and start with **Fast** quality.
+
+For a manual installation, place `opendisplay-nx.nro` in `sd:/switch/opendisplay-nx/`. Homebrew Menu launched from the Album does not provide the required application memory.
+
+## Controls
+
+Press **+** to open the menu during playback. Decoder mode, statistics, language, Disconnect and Exit are available there.
 
 | Input | Action |
 |---|---|
-| Plus | Open / close menu |
-| Either stick / D-pad Up / Down | Select a menu item |
-| A | Confirm selected action |
+| + | Open or close the menu |
+| Either stick or D-pad | Select a menu item |
+| A | Confirm |
 | B | Return to video |
-| Touch | Mac mouse input during video; select menu items |
+| Touch | Control the Mac pointer or select menu items |
 
-The menu contains decoder mode, statistics, language, Disconnect and Exit.
-X, Y and Minus have no playback shortcuts.
+## Compatibility
 
-Network reads, heartbeats and H.264 decoding run on a dedicated worker. The UI
-consumes only the newest decoded image, so vsync never blocks TCP reads and
-superseded images are not copied through VIC/uploaded. Compressed inter-frame
-H.264 packets are still decoded in order. SPS/PPS changes rebuild the decoder
-and request a new keyframe without ending the connection. GPU/SDL calls stay on
-the main thread. The UDP cursor side channel is advertised only after binding,
-confirms delivery with cursorAck, and falls back to TCP on unsupported senders.
+The receiver uses Wi-Fi IPv4 and the OpenDisplay v3 protocol. It advertises a 1280 × 720 display and supports up to 60 FPS with hardware decoding, or up to 30 FPS with software decoding. Actual frame rate and delay depend on the sender and network.
 
-The connection screen uses the Switch shared system font and follows the console's
-light/dark theme. Settings remain available during video by pressing +.
-While a Mac is connected, native activity reporting prevents inactivity dimming
-and automatic sleep, including on a static desktop. Reporting stops on disconnect.
-Pressing HOME keeps the TCP connection and decoder alive in the background; video
-presentation pauses until you return, when the latest retained frame is uploaded
-even if the desktop has stopped sending updates. Closing the application fully, or exiting
-through the Exit menu item, flushes a closing message before closing the socket. Explicit Disconnect
-and changing the decoder also end the session; select the receiver on the Mac to
-connect again. A lost network or invalid stream can still end a session.
+Audio stays on the Mac, so you can keep using its speakers or connected headphones. USB, HEVC, rotation and controller mouse input are not supported yet. Docked mode currently uses the same 720p layout as handheld mode.
 
-The sender's PNG cursor is drawn with its original hotspot. An arrow appears
-until the sprite arrives. Install identity is persisted in `id.txt`, and a fresh
-`session.log` is written on every launch (the preceding log is kept as
-`session-previous.log`), both in `sd:/switch/opendisplay-nx/`.
-
-## Scope
-
-Wi-Fi IPv4 discovery via Bonjour, TCP on port 9000, OpenDisplay wire protocol v3,
-H.264 video, PNG cursor, touch input, hardware decode with software fallback.
-Hardware frames are transferred through VIC to aligned NV12 buffers and uploaded
-to SDL; this is not a zero-copy presentation pipeline.
-
-No USB transport, sound, HEVC, rotation or controller mouse yet. Handheld 1280×720
-layout is used in the dock too. Bonjour is a minimal implementation without full
-conflict probing; future discovery work should replace it with a complete responder.
-Use on a trusted local network, as the OpenDisplay v3 transport is unauthenticated.
+This first release was tested on Switch OLED, including extended video playback and HOME return. Continuous test streams typically sampled 57–60 FPS, although a network latency spike occurred in one run. See [performance notes](docs/PERFORMANCE.md) for measurements and test conditions. Use a trusted local network; the transport does not authenticate peers.
 
 ## Build
 
