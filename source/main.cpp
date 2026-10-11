@@ -8,6 +8,7 @@
 #include "overlay.hpp"
 #include "performance.hpp"
 #include "stability.hpp"
+#include "touch_gesture.hpp"
 #include "wire.hpp"
 #include <SDL2/SDL.h>
 #include <arpa/inet.h>
@@ -149,6 +150,8 @@ public:
   locale::Language language = locale::Language::English;
   int focus = 0;
   bool fontService = false;
+  int inputWidth() const { return width; }
+  int inputHeight() const { return height; }
   int maxFrameRate() const { return hardwareAvailable ? 60 : 30; }
   void releaseDecoder() {
     if (frame)
@@ -664,7 +667,7 @@ int main() {
   rename("sdmc:/switch/opendisplay-nx/session.log",
          "sdmc:/switch/opendisplay-nx/session-previous.log");
   sessionLog = fopen("sdmc:/switch/opendisplay-nx/session.log", "w");
-  logMessage("OpenDisplay NX 0.1.2");
+  logMessage("OpenDisplay NX 0.1.3");
   Result modelService = setsysInitialize();
   if (R_SUCCEEDED(modelService)) {
     SetSysProductModel productModel = SetSysProductModel_Invalid;
@@ -782,12 +785,16 @@ int main() {
   StreamSession stream(video, output, cursorSocket);
   double lastAd = 0, networkCheck = 0, discoveryCheck = -250;
   double lastActivityReport = -30000;
-  bool touching = false, cursor = false;
-  double tx = 0, ty = 0, cx = 0, cy = 0;
+  touch::Gesture gesture;
+  bool cursor = false;
+  double cx = 0, cy = 0;
   bool drop = false;
   auto queue = [&](const json &j) {
     if (peer >= 0 && !stream.queue(j))
       drop = true;
+  };
+  auto emitTouch = [&](const char *phase, double x, double y) {
+    queue({{"type", "touch"}, {"phase", phase}, {"x", x}, {"y", y}});
   };
   bool softwareOnly = false;
   int offeredRate = 30;
@@ -817,21 +824,20 @@ int main() {
     return message;
   };
   auto disconnect = [&]() {
+    gesture.cancel(emitTouch);
     stream.stop();
     if (peer >= 0)
       close(peer);
     peer = -1;
     output.clear();
     video.clearStream();
-    touching = false;
     cursor = false;
     drop = false;
     status("Waiting for sender...");
   };
   auto closeCleanly = [&]() {
     stream.stop();
-    if (peer >= 0 && touching)
-      queue({{"type", "touch"}, {"phase", "cancelled"}, {"x", tx}, {"y", ty}});
+    gesture.cancel(emitTouch);
     if (peer >= 0)
       logMessage("Closing notification %s",
                  finishSession(peer, output) ? "sent" : "failed");
@@ -1033,27 +1039,24 @@ int main() {
           status("Video stream connected");
         }
       }
-      bool active =
-          foreground && !video.menuOpen && touch.count > 0 && video.ready;
-      double x = tx, y = ty;
-      if (active) {
-        x = std::clamp((double(touch.touches[0].x) - video.rect.x) /
-                           video.rect.w,
-                       0.0, 1.0);
-        y = std::clamp((double(touch.touches[0].y) - video.rect.y) /
-                           video.rect.h,
-                       0.0, 1.0);
+      const bool inputEnabled = foreground && !video.menuOpen && video.ready;
+      double px = 0, py = 0;
+      if (touch.count > 0) {
+        px = touch.touches[0].x;
+        py = touch.touches[0].y;
+        if (touch.count >= 2) {
+          px = (px + touch.touches[1].x) / 2;
+          py = (py + touch.touches[1].y) / 2;
+        }
       }
-      if (active || touching) {
-        if (active != touching || x != tx || y != ty)
-          queue({{"type", "touch"},
-                 {"phase", active ? (touching ? "moved" : "began") : "ended"},
-                 {"x", x},
-                 {"y", y}});
-        tx = x;
-        ty = y;
-        touching = active;
-      }
+      const double x = std::clamp((px - video.rect.x) / video.rect.w, 0.0, 1.0);
+      const double y = std::clamp((py - video.rect.y) / video.rect.h, 0.0, 1.0);
+      gesture.update(touch.count, touch.touches[0].finger_id, px, py, x, y,
+                     t, inputEnabled, double(video.inputWidth()) / video.rect.w,
+                     double(video.inputHeight()) / video.rect.h, emitTouch,
+                     [&](double dx, double dy) {
+                       queue({{"type", "scroll"}, {"dx", dx}, {"dy", dy}});
+                     });
       if (video.maxFrameRate() != offeredRate) {
         offeredRate = video.maxFrameRate();
         queue(hello());

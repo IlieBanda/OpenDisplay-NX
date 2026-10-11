@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.3 — 2026-10-11
+
+- Defer touch mouse-down until a 120 ms hold or movement beyond 14 touchscreen pixels, preventing finger jitter from turning taps into drags.
+- Cancel presses on focus loss and menu entry; support two-finger scrolling without restarting a click until all fingers lift.
+
 ## 0.1.2 — 2026-10-10
 
 - Detect the console product model through libnx and show Switch OLED, Switch Lite or Nintendo Switch consistently in discovery, protocol identity and the interface.
